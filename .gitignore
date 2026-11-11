@@ -1,0 +1,26 @@
+# Java / Maven (backend)
+target/
+*.class
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# Node / Vite (frontend)
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Variables de entorno (nunca subir secretos)
+.env
+.env.*
+!.env.example
+
+# Editores e IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
