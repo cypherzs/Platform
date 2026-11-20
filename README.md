@@ -49,4 +49,13 @@ En muchas instituciones las notas, la asistencia y las matrículas se manejan en
 - `develop`: integración del trabajo del equipo.
 - `feature/<nombre>`: una rama por funcionalidad, que se integra a `develop` mediante pull request.
 
+## Documentación
+
+| Documento | Contenido |
+| --- | --- |
+| [Análisis del sistema](docs/01-analisis.md) | Actores, permisos, casos de uso, requerimientos funcionales y no funcionales |
+| [Flujo de desarrollo](docs/02-flujo-desarrollo.md) | Estrategia de ramas, commits, pull requests y entregas |
+| [Arquitectura](docs/03-arquitectura.md) | Estilo de arquitectura, componentes, seguridad, manejo de errores y despliegue |
+| [Diagramas UML](docs/uml/) | Casos de uso, clases, secuencia de CU-07 y arquitectura |
+
 
