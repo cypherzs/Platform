@@ -13,12 +13,11 @@ Platform usa una arquitectura **cliente-servidor web**, y el servidor está orga
 
 ### Por qué esta arquitectura
 
-| Decisión | Alternativa descartada | Motivo |
-|---|---|---|
-| API REST + aplicación React separada | Páginas generadas por el servidor (Thymeleaf) | Frontend y backend se desarrollan y prueban por separado, y la misma API podría usarla después una aplicación móvil. |
-| Monolito en capas | Microservicios | Para un proyecto de este tamaño, los microservicios agregan despliegues y comunicación entre servicios sin ningún beneficio real. |
-| JWT sin estado | Sesiones en el servidor | El backend no guarda sesiones, así que es más simple desplegarlo y escalarlo. |
-| PostgreSQL | Base de datos NoSQL | Los datos son muy relacionales (estudiante, matrícula, grupo, clase, nota) y necesitan restricciones de integridad (RNF-07). |
+- **Los roles se controlan en un solo lugar.** Como todo pasa por el servidor, un acudiente no puede ver a un estudiante que no es suyo aunque llame a la API directamente.
+- **Las reglas académicas no se duplican.** El cupo del grupo, la nota del periodo, el desempeño y la promoción se calculan solo en la capa de negocio.
+- **Se puede probar por partes.** Las reglas de negocio se prueban sin pantalla ni base de datos real (RNF-04).
+- **Funciona en cualquier dispositivo.** El usuario solo necesita un navegador, también desde el celular.
+- **Es adecuada para el tamaño del proyecto.** Se puede construir y desplegar por fases, sin la complejidad de varios servicios separados.
 
 ## 2. Componentes
 
