@@ -1,6 +1,6 @@
 # Flujo de desarrollo
 
-Este documento explica cómo se organiza el trabajo en el repositorio: qué ramas existen, cómo se nombran, cómo se escriben los commits y qué pasos se siguen desde que empieza una funcionalidad hasta que llega a una entrega.
+Este documento explica cómo se organiza el trabajo en el repositorio: qué ramas existen, cómo se nombran, cómo se escriben los commits y qué pasos se siguen desde que empieza una funcionalidad hasta que se publica como una versión.
 
 ## 1. Estrategia de ramas
 
@@ -8,12 +8,12 @@ Se usa una versión simplificada de **Git Flow**:
 
 | Rama | Para qué sirve | Quién escribe en ella |
 | --- | --- | --- |
-| `main` | Versión estable. Cada entrega del proyecto queda aquí, marcada con una etiqueta. | Solo recibe pull requests desde `develop`. |
-| `develop` | Rama de integración. Contiene el trabajo terminado que aún no es una entrega. | Solo recibe pull requests desde ramas `feature/*`. |
+| `main` | Versión estable. Cada versión publicada queda aquí, marcada con una etiqueta (`v0.1.0`, `v0.2.0`…). | Solo recibe pull requests desde `develop`. |
+| `develop` | Rama de integración. Contiene el trabajo terminado que aún no se ha publicado como versión. | Solo recibe pull requests desde ramas de trabajo (`feature/*`, `docs/*`, `fix/*`). |
 | `feature/<nombre>` | Una rama por funcionalidad o tarea. | Aquí se hacen los commits del día a día. |
 
 ```
-main      ●───────────────────────────●  v1.0-entrega1
+main      ●───────────────────────────●  v0.1.0
            \                         /
 develop     ●───────●───────────────●
                      \             /
@@ -48,7 +48,7 @@ Se usa **Conventional Commits**:
 | Tipo | Cuándo se usa | Ejemplo |
 | --- | --- | --- |
 | `feat` | Nueva funcionalidad | `feat: agregar endpoint para crear estudiantes` |
-| `fix` | Corrección de un error | `fix: validar que la nota esté entre 0.0 y 5.0` |
+| `fix` | Corrección de un error | `fix: validar que la nota esté entre 1.0 y 5.0` |
 | `docs` | Solo documentación | `docs: agregar flujo de desarrollo` |
 | `test` | Agregar o corregir pruebas | `test: pruebas unitarias de CalificacionService` |
 | `refactor` | Cambio de código sin cambiar el comportamiento | `refactor: extraer cálculo de nota final a un método` |
@@ -79,17 +79,32 @@ Todo el trabajo con Git se hace desde la vista **Source Control** de VS Code (ic
 
 Un PR está listo para fusionarse cuando:
 
-- Va de `feature/*` hacia `develop` (o de `develop` hacia `main` en una entrega).
+- Va de `feature/*` hacia `develop` (o de `develop` hacia `main` al publicar una versión).
 - El título sigue Conventional Commits.
 - Compila y las pruebas pasan.
 - No incluye archivos que no tienen que ver con la tarea.
 
-## 5. Entregas y versiones
+## 5. Versiones
 
-Cuando el trabajo de una entrega está completo en `develop`:
+Se usa **versionado semántico** (`vMAYOR.MENOR.PARCHE`):
 
-1. Abrir un pull request de `develop` hacia `main` con título `chore: release entrega N`.
-2. Fusionarlo.
-3. En github.com → **Releases** → **Draft a new release** → crear la etiqueta sobre `main` con el formato `vN.0-entregaN` (por ejemplo `v1.0-entrega1`) y describir qué incluye.
+| Parte | Cuándo sube | Ejemplo |
+| --- | --- | --- |
+| MENOR | Se agrega un conjunto de funcionalidades | `v0.1.0` → `v0.2.0` |
+| PARCHE | Solo correcciones, sin funcionalidades nuevas | `v0.1.0` → `v0.1.1` |
+| MAYOR | Primera versión completa, o un cambio grande | `v0.x` → `v1.0.0` |
+
+Mientras el proyecto está en desarrollo, las versiones empiezan por `0`. La `v1.0.0` corresponde a la versión final del proyecto.
+
+| Versión | Contenido |
+| --- | --- |
+| `v0.1.0` | Análisis, diseño UML, arquitectura y estructura del repositorio |
+| `v0.2.0` | Enfoque en colegios: análisis, UML y arquitectura actualizados |
+
+Para publicar una versión, cuando el trabajo está completo en `develop`:
+
+1. Abrir un pull request de `develop` hacia `main` con título `chore: release vX.Y.Z`. **No** borrar `develop` después del merge.
+2. Fusionarlo con **Create a merge commit**.
+3. En github.com → **Releases** → **Draft a new release** → crear la etiqueta `vX.Y.Z` con target `main`, describir qué incluye y hacer clic en **Publish release**.
 
 Solo lo que está en `main` se despliega a producción.
