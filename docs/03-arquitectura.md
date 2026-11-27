@@ -18,7 +18,7 @@ Platform usa una arquitectura **cliente-servidor web**, y el servidor está orga
 | API REST + aplicación React separada | Páginas generadas por el servidor (Thymeleaf) | Frontend y backend se desarrollan y prueban por separado, y la misma API podría usarla después una aplicación móvil. |
 | Monolito en capas | Microservicios | Para un proyecto de este tamaño, los microservicios agregan despliegues y comunicación entre servicios sin ningún beneficio real. |
 | JWT sin estado | Sesiones en el servidor | El backend no guarda sesiones, así que es más simple desplegarlo y escalarlo. |
-| PostgreSQL | Base de datos NoSQL | Los datos son muy relacionales (estudiante, matrícula, curso, nota) y necesitan restricciones de integridad (RNF-07). |
+| PostgreSQL | Base de datos NoSQL | Los datos son muy relacionales (estudiante, matrícula, grupo, clase, nota) y necesitan restricciones de integridad (RNF-07). |
 
 ## 2. Componentes
 
@@ -26,7 +26,7 @@ Platform usa una arquitectura **cliente-servidor web**, y el servidor está orga
 
 | Componente | Responsabilidad |
 |---|---|
-| Páginas | Una vista por pantalla: login, panel de cada rol, estudiantes, cursos, matrículas, notas, asistencia, reportes. |
+| Páginas | Una vista por pantalla: login, panel de cada rol, estudiantes, grupos, matrículas, notas, asistencia, boletines. |
 | Componentes | Piezas reutilizables: tablas, formularios, el semáforo de riesgo, el simulador. |
 | Router | Rutas protegidas: si el rol no tiene permiso, no deja entrar a la pantalla. |
 | Servicios API | Funciones que llaman al backend con Axios y agregan el token JWT a cada petición. |
@@ -39,7 +39,7 @@ El frontend oculta lo que el usuario no puede hacer, pero **la seguridad real es
 |---|---|---|
 | Seguridad | Filtro JWT, configuración de Spring Security, BCrypt | Verifica el token y el rol **antes** de que la petición llegue al controlador. Cifra las contraseñas (RNF-01). |
 | Presentación | `@RestController` y DTOs con `@Valid` | Recibe la petición HTTP, valida el formato de los datos y llama al servicio. No contiene reglas de negocio. |
-| Negocio | `@Service` | Todas las reglas: cupos, prerrequisitos, porcentajes, nota final, riesgo, auditoría. |
+| Negocio | `@Service` | Todas las reglas: cupo del grupo, porcentajes, nota del periodo y desempeño, promoción, riesgo, auditoría e importación de SIMAT. |
 | Datos | Repositorios de Spring Data JPA y clases `@Entity` | Leen y escriben en la base de datos. Es la única capa que la toca. |
 
 **Módulos de negocio.** Cada uno tiene su controlador, su servicio y su repositorio:
@@ -47,10 +47,10 @@ El frontend oculta lo que el usuario no puede hacer, pero **la seguridad real es
 | Módulo | Casos de uso |
 |---|---|
 | Autenticación y usuarios | CU-01 |
-| Estudiantes | CU-02 |
-| Docentes y cursos | CU-03 |
-| Periodos | CU-04 |
-| Matrículas | CU-05 |
+| Estudiantes y acudientes | CU-02 |
+| Docentes, asignaturas y grupos | CU-03 |
+| Periodos y promoción | CU-04 |
+| Matrículas e importación de SIMAT | CU-05 |
 | Evaluación: actividades y calificaciones | CU-06, CU-07 |
 | Asistencia | CU-08 |
 | Consultas y simulador | CU-09 |
@@ -76,13 +76,13 @@ Son temas que afectan a todas las capas.
 1. El usuario inicia sesión. El backend compara la contraseña con el hash BCrypt guardado y, si coincide, devuelve un **JWT** firmado que incluye el id y el rol, y que vence a las pocas horas.
 2. El frontend envía ese token en cada petición, en el encabezado `Authorization: Bearer <token>`.
 3. El filtro JWT valida la firma y la fecha de vencimiento. Luego, cada endpoint declara qué roles pueden usarlo.
-4. Las reglas de "solo lo propio" (el docente con sus cursos, el estudiante con sus datos) se validan en el servicio, comparando con el usuario del token.
+4. Las reglas de "solo lo propio" (el docente con sus clases, el acudiente con sus estudiantes) se validan en el servicio, comparando con el usuario del token.
 
 ### 3.2 Manejo de errores
 Un `@RestControllerAdvice` captura todas las excepciones y las convierte en una respuesta con el mismo formato:
 
 ```json
-{ "estado": 400, "error": "Validación", "mensaje": "La nota debe estar entre 0.0 y 5.0", "fecha": "2026-11-20T10:15:00" }
+{ "estado": 400, "error": "Validación", "mensaje": "La nota debe estar entre 1.0 y 5.0", "fecha": "2026-11-20T10:15:00" }
 ```
 
 | Situación | Código HTTP |
@@ -96,7 +96,7 @@ Un `@RestControllerAdvice` captura todas las excepciones y las convierte en una 
 El frontend muestra el campo `mensaje` y nunca muestra la traza técnica (RNF-09).
 
 ### 3.3 Auditoría y logs
-- **Auditoría (RF-09):** cada cambio de una nota se guarda en la tabla `auditoria`, con el valor anterior, el valor nuevo, el usuario y la fecha. Es información del negocio y la puede consultar el Administrador.
+- **Auditoría (RF-09):** cada cambio de una nota se guarda en la tabla `auditoria`, con el registro modificado (`entidad` + `registroId`), el valor anterior, el valor nuevo, el usuario y la fecha. Es información del negocio y la puede consultar el Administrador.
 - **Logs técnicos:** SLF4J + Logback registran los errores, los intentos fallidos de inicio de sesión y la ejecución del planificador. Sirven para diagnosticar problemas y no se muestran al usuario.
 
 ### 3.4 Copias de seguridad
